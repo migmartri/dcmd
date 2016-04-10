@@ -27,7 +27,7 @@ func check(e error) {
 	}
 }
 
-func (commands Commands) availableCommands() []string {
+func (commands Commands) availableCommandNames() []string {
 	var res []string
 	for _, elem := range commands.Commands {
 		res = append(res, elem.Name)
@@ -63,23 +63,49 @@ func (commands Commands) invoke(name string) {
 	}
 
 	if toInvoke == (Command{}) {
-		fmt.Printf("Command: \"%v\" not found. Available options: %v \n", name, strings.Join(commands.availableCommands(), ", "))
+		fmt.Printf("Command: \"%v\" not found. Available options: %v \n", name, strings.Join(commands.availableCommandNames(), ", "))
 		os.Exit(0)
 	}
 
 	toInvoke.invoke()
 }
 
-func main() {
-	data, err := ioutil.ReadFile("dcmd.yaml")
-	check(err)
+func checkFileExists(fileName string) {
+	if _, err := os.Stat(fileName); err != nil {
+		fmt.Printf("\"%v\" not found in current directory\n", fileName)
+		os.Exit(0)
+	}
+}
 
-	args := os.Args[1:]
-	commandName := args[0]
+func checkArgs() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: \"dcmd <command>\"")
+		os.Exit(0)
+	}
+}
+
+const composeFileName = "docker-compose.yml"
+const dcmdFileName = "dcmd.yml"
+
+func loadDcmdYamlFile() Commands {
+	data, err := ioutil.ReadFile(dcmdFileName)
+	check(err)
 
 	var commands = Commands{}
 	err = yaml.Unmarshal([]byte(data), &commands)
 	check(err)
+	return commands
+}
 
+func main() {
+	checkFileExists(composeFileName)
+	checkFileExists(dcmdFileName)
+	checkArgs()
+
+	/* load commandName introduced via CLI args */
+	commandName := os.Args[1]
+	/* Load Yaml file */
+	commands := loadDcmdYamlFile()
+	/* Invoke dcmd command */
 	commands.invoke(commandName)
 }
