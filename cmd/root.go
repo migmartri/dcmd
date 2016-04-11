@@ -17,7 +17,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
+	"os/exec"
+	"regexp"
 )
 
 var cfgFile string
@@ -47,8 +50,53 @@ func Execute() {
 	}
 }
 
-func init() {
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+/*
+  TODO: Mark default option based on your previously choice, supporting clicking enter
+*/
+func chooseContainer() string {
+	names := getContainerNames()
+	var choice int
+	if len(names) == 0 {
+		fmt.Println("You do not have any container available, please run docker-compose up first.")
+		os.Exit(0)
+	}
 
+	fmt.Println(`Select the container you want to run the command in:`)
+	for i, elem := range names {
+		fmt.Printf("  %d. %s\n", i+1, elem)
+	}
+
+	if _, err := fmt.Scanf("%d", &choice); err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(0)
+	}
+
+	// Choice out of bounds
+	if len(names) < choice {
+		fmt.Println(`Invalid choice.`)
+		os.Exit(0)
+	}
+
+	/* Clear the terminal */
+	cmd := exec.Command(`clear`)
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+
+	return names[choice-1]
+}
+
+func getContainerNames() []string {
+	out, err := exec.Command("docker-compose", "ps").Output()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	// Get first lines of the output on docker-compose
+	r := regexp.MustCompile(`(?m)^[a-z\d_]+`)
+	return r.FindAllString(string(out), -1)
+}
+
+func init() {
 	checkDockerComposeFile()
 }
