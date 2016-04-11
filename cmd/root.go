@@ -17,6 +17,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -55,6 +57,8 @@ func Execute() {
 */
 func chooseContainer() string {
 	names := getContainerNames()
+	var containerName string
+
 	var choice int
 	if len(names) == 0 {
 		fmt.Println("You do not have any container available, please run docker-compose up first.")
@@ -63,11 +67,23 @@ func chooseContainer() string {
 
 	fmt.Println(`Select the container you want to run the command in:`)
 	for i, elem := range names {
-		fmt.Printf("  %d. %s\n", i+1, elem)
+		fmt.Printf("  %d. %s", i+1, elem)
+		/* Set the value to the one that is in the configuration */
+		if nameInConfig := viper.GetString("container"); elem == nameInConfig {
+			fmt.Printf(" (default)")
+			containerName = elem
+		}
+		fmt.Println()
 	}
 
 	if _, err := fmt.Scanf("%d", &choice); err != nil {
-		fmt.Printf("%s\n", err)
+		if err.Error() == "unexpected newline" {
+			/* We pressed enter but we have an option in the config file */
+			if containerName != "" {
+				return containerName
+			}
+		}
+		fmt.Println("Invalid choice")
 		os.Exit(0)
 	}
 
@@ -78,11 +94,34 @@ func chooseContainer() string {
 	}
 
 	/* Clear the terminal */
-	cmd := exec.Command(`clear`)
-	cmd.Stdout = os.Stdout
-	cmd.Run()
+	// cmd := exec.Command(`clear`)
+	// cmd.Stdout = os.Stdout
+	// cmd.Run()
 
-	return names[choice-1]
+	fmt.Printf("%s", containerName)
+	containerName = names[choice-1]
+	writeInConfigFile(fmt.Sprintf("container=\"%s\"", containerName))
+	return containerName
+}
+
+func writeInConfigFile(keyValue string) {
+	configFile := fmt.Sprintf("%s.toml", configFile)
+	_, err := os.Stat(configFile)
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			newFile, err := os.Create(configFile)
+			if err != nil {
+				log.Fatal(err)
+				os.Exit(1)
+			}
+			newFile.Close()
+		}
+	}
+	err = ioutil.WriteFile(configFile, []byte(keyValue), 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getContainerNames() []string {
@@ -97,6 +136,19 @@ func getContainerNames() []string {
 	return r.FindAllString(string(out), -1)
 }
 
+const configFile = ".dcmd"
+
+func initConfig() {
+	viper.SetConfigName(configFile) // name of config file (without extension)
+	viper.AddConfigPath(".")        // adding home directory as first search path
+	// If a config file is found, read it in.
+	viper.ReadInConfig()
+}
+
 func init() {
-	checkDockerComposeFile()
+	cobra.OnInitialize(checkDockerComposeFile)
+	cobra.OnInitialize(initConfig)
+
+	// RootCmd.PersistentFlags().String("container", "", "docker container name/id (optional)")
+	// viper.BindPFlag("container", RootCmd.PersistentFlags().Lookup("container"))
 }
