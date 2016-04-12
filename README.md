@@ -1,8 +1,9 @@
-# dcmd
+[![Build
+Status](https://travis-ci.org/migmartri/dcmd.svg?branch=master)](https://travis-ci.org/migmartri/dcmd)
+
+# dcmd - Dead simple Docker Compose command line tool
+
 ### TODO
-* Default to previously selected option
-* docker attach command
-* bash completion
-* Check docker-compose is installed
-* Better error handling
 * Documentation and examples
+* Better error handling
+* bash completion
