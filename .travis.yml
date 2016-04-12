@@ -1,0 +1,15 @@
+language: go
+before_install:
+- go get github.com/mitchellh/gox
+script:
+- gox -os="darwin linux windows" -arch="amd64" .
+deploy:
+  provider: releases
+  api_key:
+    secure: sxyVlWRjb5UmM0QcNPbHdfzapUxyhN9AF6c8EfBsjQl1wKv0afECEqWNkuMlPDJheT9vT8SqmFxSwVfoNwhT30T9GB04rxM4RqLhATspd7jvQ/Fes0y29Ohdm64GfVAYhxQjfBI4Nhbqcs2yt9YAANMYMND9eOrsIiQDfXcaFce+VXRZBefsxUaFlHBjF9AMH0kxdAgNb4jXuSJRuWqreIl4c85f6PNKDc9M6oJPi7xh9xNnjc+yMpW5aV9uCXzca5qXaMBRCnBaPd4mWGNJRE+CNW8QBLCKVg2BOiKz6zSw/r1NLpXBdjxLi1DcqEj5AIegXflsNgVxJS4E0x+3UliWvdyKoO+wY0D0VeFGQr5CQTgm6HLdauV/q+IxPZuVAgjig4QQ+QE5BYpdIEFwdOENEPmhlQho/HQOF4cd997u6d3SzHsk0wYcn4axM08QMYuLMOs6thQ2nc7iv614Yhzu8EN/IL9reEjn3joVrSWX0vf6dtN7AtLwxL23xgq73qI6yIxb/+x9uxQN71VT153kdUKd5oeMdYCav/cvVRq/Dc+f7np/GBesQvYaVyDf7+w5ECHDXsgKp0fbZgFjpDg326MGUtn6bkHpVZ45rSy2VWbNyW/4JJjX8rURVoWPnfGUyCi+uJUB30G57eXaqvuoGYPeNVkkPoRWQePOPcQ=
+  file:
+    - "dcmd_darwin_amd64"
+    - "dcmd_linux_amd64"
+    - "dcmd_windows_amd64.exe"
+  on:
+    tags: true

@@ -1,3 +1,2 @@
-*.yaml
-*.yml
+docker-compose.yml
 .dcmd.toml
