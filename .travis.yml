@@ -3,8 +3,6 @@ go:
   - 1.6
 before_install:
   - go get github.com/mitchellh/gox
-before_script:
-  - gox -os="darwin linux windows" -arch="amd64" -build-toolchain
 script:
   - gox -os="darwin linux windows" -arch="amd64" .
 deploy:
