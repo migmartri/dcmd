@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +37,7 @@ func invokeCommand(cmd *cobra.Command, args []string) {
 	/** Check number of args and show usage information if needed */
 	if len(args) == 0 {
 		cmd.Usage()
-		os.Exit(0)
+		os.Exit(1)
 	}
 	container := chooseContainer()
 	dockerExec(container, args)
@@ -57,8 +58,7 @@ func dockerExec(containerName string, command []string) {
 	err := cmd.Run()
 
 	if err != nil {
-		fmt.Println(`Error executing the command`)
-		os.Exit(0)
+		log.Fatal(`Error executing the command`)
 	}
 }
 

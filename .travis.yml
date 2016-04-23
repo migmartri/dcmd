@@ -3,9 +3,8 @@ go:
   - 1.6
 before_install:
   - go get github.com/mitchellh/gox
-  - go get github.com/inconshreveable/mousetrap
 script:
-  - gox -os="darwin linux windows" -arch="amd64" .
+  - gox -os="darwin linux" -arch="amd64" .
 deploy:
   provider: releases
   api_key:
@@ -13,6 +12,5 @@ deploy:
   file:
     - "dcmd_darwin_amd64"
     - "dcmd_linux_amd64"
-    - "dcmd_windows_amd64.exe"
   on:
     tags: true

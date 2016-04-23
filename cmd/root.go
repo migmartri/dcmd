@@ -39,16 +39,14 @@ i.e, "dcmd exec rails c" instead of "docker exec -it <container name> rails c`,
 
 func checkDockerComposeFile() {
 	if _, err := os.Stat(composeFileName); err != nil {
-		fmt.Printf("\"%v\" file not found in current directory\n", composeFileName)
-		os.Exit(0)
+		log.Fatalf("\"%v\" file not found in current directory\n", composeFileName)
 	}
 }
 
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		log.Fatal(err)
 	}
 }
 
@@ -61,8 +59,7 @@ func chooseContainer() string {
 
 	var choice int
 	if len(names) == 0 {
-		fmt.Println("You do not have any container available, please run docker-compose up first.")
-		os.Exit(0)
+		log.Fatal("You do not have any container available, please run docker-compose up first.")
 	}
 
 	fmt.Println(`Select the container you want to run the command in:`)
@@ -83,14 +80,12 @@ func chooseContainer() string {
 				return containerName
 			}
 		}
-		fmt.Println("Invalid choice")
-		os.Exit(0)
+		log.Fatal("Invalid choice")
 	}
 
 	// Choice out of bounds
 	if len(names) < choice {
-		fmt.Println(`Invalid choice.`)
-		os.Exit(0)
+		log.Fatal(`Invalid choice.`)
 	}
 
 	/* Clear the terminal */
@@ -113,7 +108,6 @@ func writeInConfigFile(keyValue string) {
 			newFile, err := os.Create(configFile)
 			if err != nil {
 				log.Fatal(err)
-				os.Exit(1)
 			}
 			newFile.Close()
 		}
@@ -128,7 +122,6 @@ func getContainerNames() []string {
 	out, err := exec.Command("docker-compose", "ps").Output()
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	// Get first lines of the output on docker-compose

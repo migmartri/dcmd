@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 
@@ -46,8 +47,7 @@ func dockerAttach(containerName string) {
 	err := cmd.Run()
 
 	if err != nil {
-		fmt.Println(`Error attaching to container`)
-		os.Exit(0)
+		log.Fatal(`Error attaching to container`)
 	}
 }
 
